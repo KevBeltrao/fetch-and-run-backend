@@ -7,11 +7,18 @@ import (
 	"github.com/kevbeltrao/fetch-and-run-backend/internal/server/websocket"
 )
 
-func main() {
-	http.HandleFunc("/websocket", websocket.HandleConnections)
+const PORT = ":8000"
 
-	log.Println("Server started on :8000")
-	err := http.ListenAndServe(":8000", nil)
+func main() {
+	hub := websocket.NewHub()
+	go hub.Run()
+
+	http.HandleFunc("/websocket", func(writer http.ResponseWriter, request *http.Request) {
+		websocket.HandleConnections(hub, writer, request)
+	})
+
+	log.Println("Server started on", PORT)
+	err := http.ListenAndServe(PORT, nil)
 	if err != nil {
 		log.Fatal("Error starting server", err)
 	}
