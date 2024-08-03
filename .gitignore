@@ -1,0 +1,17 @@
+# Binaries
+/bin/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Go-specific files
+*.exe
+*.test
+*.out
+
+# Dependency directories (for vendoring)
+vendor/
+
+# Log files
+*.log
