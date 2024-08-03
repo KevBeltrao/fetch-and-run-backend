@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/gorilla/websocket"
+	gorillaWebsocket "github.com/gorilla/websocket"
 )
 
 const (
@@ -22,7 +22,7 @@ var (
 
 type Client struct {
 	hub        *Hub
-	connection *websocket.Conn
+	connection *gorillaWebsocket.Conn
 	send       chan []byte
 }
 
@@ -42,7 +42,7 @@ func (client *Client) readPump() {
 	for {
 		_, message, err := client.connection.ReadMessage()
 		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+			if gorillaWebsocket.IsUnexpectedCloseError(err, gorillaWebsocket.CloseGoingAway, gorillaWebsocket.CloseAbnormalClosure) {
 				log.Printf("error: %v", err)
 			}
 			break
@@ -63,11 +63,11 @@ func (client *Client) writePump() {
 		case message, ok := <-client.send:
 			client.connection.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
-				client.connection.WriteMessage(websocket.CloseMessage, []byte{})
+				client.connection.WriteMessage(gorillaWebsocket.CloseMessage, []byte{})
 				return
 			}
 
-			writer, err := client.connection.NextWriter(websocket.TextMessage)
+			writer, err := client.connection.NextWriter(gorillaWebsocket.TextMessage)
 			if err != nil {
 				return
 			}
@@ -85,7 +85,7 @@ func (client *Client) writePump() {
 			}
 		case <-ticket.C:
 			client.connection.SetWriteDeadline(time.Now().Add(writeWait))
-			if err := client.connection.WriteMessage(websocket.PingMessage, nil); err != nil {
+			if err := client.connection.WriteMessage(gorillaWebsocket.PingMessage, nil); err != nil {
 				return
 			}
 		}

@@ -10,11 +10,10 @@ import (
 const PORT = ":8000"
 
 func main() {
-	hub := websocket.NewHub()
-	go hub.Run()
+	manager := websocket.NewHubManager()
 
 	http.HandleFunc("/websocket", func(writer http.ResponseWriter, request *http.Request) {
-		websocket.HandleConnections(hub, writer, request)
+		websocket.HandleConnections(manager, writer, request)
 	})
 
 	log.Println("Server started on", PORT)
