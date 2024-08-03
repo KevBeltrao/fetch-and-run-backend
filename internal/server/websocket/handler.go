@@ -13,12 +13,24 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func HandleConnections(hub *Hub, writer http.ResponseWriter, request *http.Request) {
+func HandleConnections(
+	manager *HubManager,
+	writer http.ResponseWriter,
+	request *http.Request,
+) {
+	matchId := request.URL.Query().Get("matchId")
+	if matchId == "" {
+		log.Println("Match ID is required")
+		return
+	}
+
 	websocket, err := upgrader.Upgrade(writer, request, nil)
 	if err != nil {
 		log.Println("Error upgrading connection", err)
 	}
 	defer websocket.Close()
+
+	hub := manager.GetHub(matchId)
 
 	client := &Client{
 		hub:        hub,
@@ -26,8 +38,10 @@ func HandleConnections(hub *Hub, writer http.ResponseWriter, request *http.Reque
 		send:       make(chan []byte, 256),
 	}
 
-	client.hub.register <- client
+	manager.JoinHub(matchId, client)
 
 	go client.writePump()
 	client.readPump()
+
+	manager.LeaveHub(matchId, client)
 }
