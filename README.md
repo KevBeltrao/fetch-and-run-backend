@@ -73,13 +73,15 @@ make lint
 
 ## Commands
 
-| Command       | Description                         |
-|---------------|-------------------------------------|
-| `make`        | Build the application               |
-| `make run`    | Build and run the application       |
-| `make test`   | Run tests                           |
-| `make clean`  | Clean the build                     |
-| `make fmt`    | Format the code                     |
-| `make lint`   | Lint the code                       |
-| `make deps`   | Install dependencies                |
-| `make help`   | Display help information            |
+| Command        | Description                        |
+|----------------|------------------------------------|
+| `make`         | Build the application              |
+| `make prepare` | Install Git hooks                  |
+| `make run`     | Build and run the application      |
+| `make test`    | Run tests                          |
+| `make clean`   | Clean the build                    |
+| `make fmt`     | Format the code                    |
+| `make lint`    | Lint the code                      |
+| `make deps`    | Install dependencies               |
+| `make help`    | Display help information           |
+ 

@@ -1,6 +1,5 @@
 SERVICE_NAME = http
 CMD_DIR = ./cmd/$(SERVICE_NAME)
-GO_FILES = $(shell find . -name '*.go' -not -path "./vendor/*")
 HOOKS_DIR = .git/hooks
 PRE_COMMIT_HOOK = $(HOOKS_DIR)/pre-commit
 
@@ -30,12 +29,12 @@ clean:
 .PHONY: fmt
 fmt:
 	@echo "Formatting the code..."
-	GO111MODULE=on go fmt $(GO_FILES)
+	GO111MODULE=on go fmt ./...
 
 .PHONY: lint
 lint:
 	@echo "Linting the code..."
-	GO111MODULE=on golangci-lint run
+	GO111MODULE=on golangci-lint run  --skip-dirs='/usr/local/go'
 
 .PHONY: deps
 deps:
