@@ -104,6 +104,7 @@ func (hub *Hub) Run() {
 				continue
 			}
 
+			client.hub = hub
 			hub.clients[client] = true
 			hub.playerIds[client.playerId] = true
 
