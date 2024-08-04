@@ -20,6 +20,11 @@ var (
 	space   = []byte{' '}
 )
 
+type Message struct {
+	Type    string      `json:"type"`
+	Payload interface{} `json:"payload"`
+}
+
 type Client struct {
 	hub        *Hub
 	connection *gorillaWebsocket.Conn
@@ -48,6 +53,7 @@ func (client *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+		log.Printf("Message received: %s", string(message))
 		client.hub.broadcast <- message
 	}
 }
@@ -83,6 +89,7 @@ func (client *Client) writePump() {
 			if err := writer.Close(); err != nil {
 				return
 			}
+			log.Printf("Message sent: %s", string(message))
 		case <-ticket.C:
 			client.connection.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := client.connection.WriteMessage(gorillaWebsocket.PingMessage, nil); err != nil {
