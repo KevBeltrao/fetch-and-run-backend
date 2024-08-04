@@ -20,15 +20,11 @@ var (
 	space   = []byte{' '}
 )
 
-type Message struct {
-	Type    string      `json:"type"`
-	Payload interface{} `json:"payload"`
-}
-
 type Client struct {
 	hub        *Hub
 	connection *gorillaWebsocket.Conn
 	send       chan []byte
+	playerId   string
 }
 
 func (client *Client) readPump() {

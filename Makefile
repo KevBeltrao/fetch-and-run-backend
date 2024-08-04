@@ -1,4 +1,4 @@
-SERVICE_NAME = http
+SERVICE_NAME = fetch-and-run-backend
 CMD_DIR = ./cmd/$(SERVICE_NAME)
 HOOKS_DIR = .git/hooks
 PRE_COMMIT_HOOK = $(HOOKS_DIR)/pre-commit
