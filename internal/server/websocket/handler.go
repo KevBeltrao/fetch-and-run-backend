@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -42,12 +43,53 @@ func HandleConnections(
 		send:       make(chan []byte, 256),
 	}
 
+	go client.writePump()
+	_, message, err := websocket.ReadMessage()
+	if err != nil {
+		log.Println("Error reading message", err)
+		return
+	}
+
+	var unmarshaledMessage Message
+	if err := json.Unmarshal(message, &unmarshaledMessage); err != nil {
+		log.Println("Error unmarshaling message", err)
+		websocket.Close()
+		return
+	}
+
+	if unmarshaledMessage.Type != Initial {
+		log.Println("Initial message type required")
+		websocket.Close()
+		return
+	}
+
+	payload, ok := unmarshaledMessage.Payload.(map[string]interface{})
+	if !ok {
+		log.Println("Invalid payload")
+		websocket.Close()
+		return
+	}
+
+	playerId, ok := payload["playerId"].(string)
+	if !ok || playerId == "" {
+		log.Println("Player ID is required")
+		websocket.Close()
+		return
+	}
+
+	client.playerId = playerId
+	hub := manager.GetHub(matchId)
+
+	if hub.playerIds[playerId] {
+		client.connection.WriteMessage(gorillaWebsocket.TextMessage, []byte("Player ID already exists"))
+		client.connection.Close()
+		return
+	}
+
 	manager.JoinHub(matchId, client)
-	client.hub = manager.GetHub(matchId)
 
 	log.Println("Client joined hub")
 
-	go client.writePump()
 	client.readPump()
 
 	log.Println("Client left hub")

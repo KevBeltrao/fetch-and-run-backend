@@ -3,6 +3,8 @@ package websocket
 import (
 	"encoding/json"
 	"log"
+
+	gorillaWebsocket "github.com/gorilla/websocket"
 )
 
 type PlayerState struct {
@@ -20,6 +22,7 @@ type Hub struct {
 	register   chan *Client
 	unregister chan *Client
 	state      GameState
+	playerIds  map[string]bool
 }
 
 func NewHub() *Hub {
@@ -31,6 +34,7 @@ func NewHub() *Hub {
 		state: GameState{
 			Players: make(map[string]PlayerState),
 		},
+		playerIds: make(map[string]bool),
 	}
 }
 
@@ -94,11 +98,20 @@ func (hub *Hub) Run() {
 	for {
 		select {
 		case client := <-hub.register:
+			if hub.playerIds[client.playerId] {
+				client.connection.WriteMessage(gorillaWebsocket.TextMessage, []byte(`{"error": "duplicate playerId"}`))
+				client.connection.Close()
+				continue
+			}
+
 			hub.clients[client] = true
+			hub.playerIds[client.playerId] = true
+
 			log.Printf("Client registered: %v. Total clients: %d", client, len(hub.clients))
 		case client := <-hub.unregister:
 			if _, ok := hub.clients[client]; ok {
 				delete(hub.clients, client)
+				delete(hub.playerIds, client.playerId)
 				close(client.send)
 				log.Printf("Client unregistered: %v. Total clients: %d", client, len(hub.clients))
 			}
