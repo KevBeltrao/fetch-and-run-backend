@@ -8,8 +8,8 @@ import (
 )
 
 type PlayerState struct {
-	X int
-	Y int
+	X float64
+	Y float64
 }
 
 type GameState struct {
@@ -64,8 +64,8 @@ func (hub *Hub) handlePlayerMove(payload interface{}) {
 	}
 
 	hub.state.Players[playerId] = PlayerState{
-		X: int(x),
-		Y: int(y),
+		X: x,
+		Y: y,
 	}
 
 	updatedState, _ := json.Marshal(Message{
