@@ -69,13 +69,21 @@ func (hub *Hub) handlePlayerMove(payload interface{}) {
 	}
 
 	updatedState, _ := json.Marshal(Message{
-		Type:    "updateState",
-		Payload: hub.state,
+		Type: "updateState",
+		Payload: map[string]PlayerState{
+			playerId: {
+				X: x,
+				Y: y,
+			},
+		},
 	})
 
 	log.Printf("Broadcasting updated state: %s", string(updatedState))
 
 	for client := range hub.clients {
+		if client.playerId == playerId {
+			continue
+		}
 		select {
 		case client.send <- updatedState:
 			log.Printf("Message sent to client: %v", client)
@@ -84,6 +92,7 @@ func (hub *Hub) handlePlayerMove(payload interface{}) {
 			delete(hub.clients, client)
 		}
 	}
+
 }
 
 func (hub *Hub) handleMessage(message Message) {
@@ -115,6 +124,23 @@ func (hub *Hub) Run() {
 				delete(hub.playerIds, client.playerId)
 				close(client.send)
 				log.Printf("Client unregistered: %v. Total clients: %d", client, len(hub.clients))
+
+				playerLeaveMessage, _ := json.Marshal(Message{
+					Type: PlayerLeave,
+					Payload: map[string]string{
+						"playerId": client.playerId,
+					},
+				})
+
+				for client := range hub.clients {
+					select {
+					case client.send <- playerLeaveMessage:
+						log.Printf("Message sent to client: %v", client)
+					default:
+						close(client.send)
+						delete(hub.clients, client)
+					}
+				}
 			}
 		case message := <-hub.broadcast:
 			var messageUnmarshaled Message
