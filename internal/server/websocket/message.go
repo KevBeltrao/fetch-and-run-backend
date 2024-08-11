@@ -12,4 +12,5 @@ const (
 	UpdateState = "updateState"
 	PlayerMove  = "playerMove"
 	Initial     = "initial"
+	PlayerLeave = "playerLeave"
 )
